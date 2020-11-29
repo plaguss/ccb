@@ -34,7 +34,7 @@ here = up(up(os.path.abspath(__file__)))
 if here not in sys.path:
     sys.path.append(here)
 
-import crack_ccb.activities as act
+import ccb.activities as act
 
 
 WAIT_FOR_CLOSE = 5  # Wait 5 seconds before closing the page.
