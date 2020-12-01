@@ -16,12 +16,12 @@ The script runs opens the browser in *headless* mode in chrome (without opening 
 browser), but if the headless option wasn't given, we would see the browser doing the following 
 sequence (but much slower):
 
-<img src="img/ccb.gif" width="500" height="500" />
+<img src="img/ccb.gif" width="550" height="450" />
 
 
 ### How it works
 
-Fill the **Username** and **Password** in the [config.json](config.json),
+Fill the **Username** and **Password** in the [config.json](./ccb/config.json),
 and the classes to attend following the structure:
 
 ```
