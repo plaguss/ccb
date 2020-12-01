@@ -12,7 +12,12 @@ The work under the hood is done with [selenium](https://selenium-python.readthed
 
 ### What it does
 
-<img src="img/ccb.gif" width="750" height="750" />
+The script runs opens the browser in *headless* mode in chrome (without opening the
+browser), but if the headless option wasn't given, we would see the browser doing the following 
+sequence (but much slower):
+
+<img src="img/ccb.gif" width="500" height="500" />
+
 
 ### How it works
 
@@ -23,9 +28,8 @@ and the classes to attend following the structure:
 "days": {
     "dd/mm/yyyy": {
         "hh:mm": [CLASS]
-		}
-        }
-
+    }
+}
 ```
 
 Where _CLASS_ must be one of *Open Box*, *Crossfit*, *Calsithenics* or *Weightlifting*
