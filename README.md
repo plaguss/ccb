@@ -12,9 +12,7 @@ The work under the hood is done with [selenium](https://selenium-python.readthed
 
 ### What it does
 
-![](img/ccb.gif =100x100)
-
-<img src="img/ccb.gif" width="40" height="40" />
+<img src="img/ccb.gif" width="750" height="750" />
 
 ### How it works
 
