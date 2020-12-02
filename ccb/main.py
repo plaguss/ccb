@@ -207,7 +207,8 @@ class CCB:
             options = wd.ChromeOptions()
             options.add_argument('headless')
 
-            self._driver = wd.Chrome(driver_path, options=options)
+            self._driver = wd.Chrome(driver_path)
+            # self._driver = wd.Chrome(driver_path, options=options)
             self._driver.maximize_window()
         else:
             raise NotImplementedError(
@@ -285,6 +286,7 @@ class CCB:
         day_button = self.driver.find_element(By.LINK_TEXT, strday)
         logging.info(day_button.get_attribute('href'))
         day_button.click()
+        self._driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         logging.info('Day found: {}'.format(strday))
 
     def get_activities(self) -> typing.List[act.Activity]:
@@ -315,13 +317,13 @@ class CCB:
                     arguments = {'schedule': row_elements[0], 'reservation': row_elements[2], 'button': row_elements[3]}
                     activity = self._get_activity(arguments, name)
                     activities.append(activity)
-                    logging.info(activity)
+                    # logging.info(activity)
 
         return activities
 
-    @staticmethod
+    # @staticmethod
     def _parse_table_elem(
-            pos: int, cell: we.WebElement
+            self, pos: int, cell: we.WebElement
     ) -> typing.Union[act.Schedule, act.Button, act.Reservation, str]:
         """Parses each element of the table to its corresponding object.
 
@@ -352,7 +354,7 @@ class CCB:
             else:
                 elem = cell.find_element(By.CSS_SELECTOR, 'a')
                 icon = cell.find_element_by_css_selector('span').get_attribute('class')
-            elem = act.Button(elem, icon=icon)
+            elem = act.Button(elem, self.driver, icon=icon)
         else:
             raise ValueError('This element is not expected: {}'.format(cell))
 
@@ -427,12 +429,18 @@ if __name__ == '__main__':
     # dia = TODAY + period(days=1)
     days = config_file.wanted_days()
 
-    # TODO: Loop over the list of days.
+    # TODO: Loop over the list of days. For the moment only one
     ccb.get_day(days[0])
     activities = ccb.get_activities()
-    wanted_hours = config_file.wanted_hours()
     wanted_activities = config_file.wanted_classes()
+    # TODO: Get the correct hour.
+    wanted_hours = config_file.wanted_hours()
+    wanted_hour = act.Hour('15:00')
     for activity in activities:
-        if activity in wanted_activities:
-            activity.book()
-    ccb.close_page()
+        if activity.name in wanted_activities:  # Check only in those selected.
+            if wanted_hour in activity.schedule:  # Check for the hour.
+                logging.info("Activity: {}".format(activity))
+                is_booked = activity.book()
+                logging.info("Are we registered? {}.".format(is_booked))
+
+    # ccb.close_page()

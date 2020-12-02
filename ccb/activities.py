@@ -242,7 +242,11 @@ class Button:
     TODO:
         determinar si un botón es glyphicon-minus para NO clickar.
     """
-    def __init__(self, element: typing.Union[we.WebElement, str], icon: typing.Union[str, None] = None) -> None:
+    def __init__(
+            self, element: typing.Union[we.WebElement, str],
+            driver: "WebDriver",
+            icon: typing.Union[str, None] = None,
+    ) -> None:
         if isinstance(element, str):
             self._enabled = False
             self._icon = icon
@@ -250,6 +254,7 @@ class Button:
             self.element = element
             self._enabled = True
             self.icon = icon
+        self.driver = driver
 
     def __repr__(self):
         if self.icon is not None:
@@ -287,7 +292,15 @@ class Button:
     def click(self) -> None:
         """Clicks the button, then registering to a class. """
         if self.is_enabled():
-            self.element.click()
+            try:
+                self.element.click()
+                logging.info("Class booked!")
+            except:
+                logging.info("The button could not be clicked, trying to execute the element.")
+                self.driver.execute_script("arguments[0].click();", self.element)
+            finally:
+                logging.info("Could not book the class")
+
         else:
             warnings.warn('The Button cannot be clicked.')
 
@@ -319,7 +332,7 @@ class Activity:
     def __str__(self):
         return self.__repr__()
 
-    def book(self) -> None:
+    def book(self) -> bool:
         """Returns True if there was space and the class could be registered,
         False otherwise.
         """
@@ -327,8 +340,16 @@ class Activity:
         if self.reservation.is_free():
             self.button.click()
             logging.info('Class registered: {}'.format(self))
+            check = True
         else:
             logging.info('No space at the moment')
+            check = True
+
+        return check
+
+    @property
+    def name(self) -> str:
+        raise NotImplementedError
 
 
 class OpenBox(Activity):
@@ -336,11 +357,19 @@ class OpenBox(Activity):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
+    @property
+    def name(self) -> str:
+        return Activities.OPEN_BOX
+
 
 class Crossfit(Activity):
     """Activity subclass for a Crossfit class. """
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
+
+    @property
+    def name(self) -> str:
+        return Activities.CROSSFIT
 
 
 class Calisthenics(Activity):
@@ -348,10 +377,16 @@ class Calisthenics(Activity):
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
+    @property
+    def name(self) -> str:
+        return Activities.CALISTHENICS
+
 
 class Weightlifting(Activity):
     """Activity subclass for a Weightlifting class. """
     def __init__(self, **kwargs) -> None:
         super().__init__(**kwargs)
 
-
+    @property
+    def name(self) -> str:
+        return Activities.WEIGHTLIFTING
