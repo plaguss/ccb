@@ -1,7 +1,9 @@
 {
-	"Username": "****",
-	"Password": "****",
-	"wanted_classes": ["Open Box"],
-	"wanted_hours": ["11:00"],
-	"wanted_days": ["29/11/2020"]
+"Username": "****",
+"Password": "****",
+"days": {
+    "22/11/2020": {
+        "11:00": ["Open Box", "Crossfit"]
+    }
+}
 }

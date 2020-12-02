@@ -71,12 +71,15 @@ class JsonConfig:
     """
     Sample config file:
     {
-    "Username": "agustin.piqueres@gmail.com",
-    "Password": "2293",
-    "wanted_classes": ["Open Box", "Crossfit"],
-    "wanted_hours": ["11:00"],
-    "wanted_days": ["22/11/2020"]
+    "Username": "****",
+    "Password": "****",
+    "days": {
+        "22/11/2020": {
+            "11:00": ["Open Box", "Crossfit"]
+        }
     }
+    }
+
     Must contain 5 elements:
         - Username: string with the username. In general it should be
         your email account.
@@ -121,11 +124,15 @@ class JsonConfig:
         Parse the class string to one defined in Activities, which are present in
         the page.
         """
-        for wanted_class in self._data['wanted_classes']:
-            if wanted_class not in CLASS_MAP.keys():
-                raise ClassError(wanted_class)
-            activity = CLASS_MAP[wanted_class]
-            self._classes.append(activity)
+        for day in self._data["days"]:
+            self._days.append(self._parse_day(day))
+            for hour in self._data["days"][day]:
+                self._hours.append(act.Hour(hour))
+                for wanted_class in self._data["days"][day][hour]:
+                    if wanted_class not in CLASS_MAP.keys():
+                        raise ClassError(wanted_class)
+                    activity = CLASS_MAP[wanted_class]
+                    self._classes.append(activity)
 
     def submit_info(self) -> typing.Tuple[str, str]:
         """Returns a tuple with the username and password. """
@@ -139,8 +146,8 @@ class JsonConfig:
 
     def wanted_hours(self) -> typing.List[act.Hour]:
         """Hour objects to check for a place. """
-        for h in self._data['wanted_hours']:
-            self._hours.append(act.Hour(h))
+        if len(self._hours) == 0:
+            self._get_classes()
 
         if len(self._hours) == 0:
             raise NoHoursError()
@@ -149,8 +156,9 @@ class JsonConfig:
 
     def wanted_days(self) -> typing.List[dt.date]:
         """Days to check for a class, as a list of dt.date objects. """
-        for day in self._data['wanted_days']:
-            self._days.append(self._parse_day(day))
+        if len(self._days) == 0:
+            self._get_classes()
+
         return self._days
 
     @staticmethod
@@ -386,8 +394,15 @@ class CCB:
         return activity
 
     def close_page(self) -> None:
-        time.sleep(2)
+        """Call at the end of the program to close the window.
+        Has no effect on headless mode.
+        """
+        time.sleep(1)
         self.driver.close()
+
+    def refresh(self) -> None:
+        """To be called ro reload the tables, maybe? """
+        self.driver.refresh()
 
 
 if __name__ == '__main__':
@@ -411,6 +426,7 @@ if __name__ == '__main__':
     time.sleep(WAIT_FOR_CLOSE)
     # dia = TODAY + period(days=1)
     days = config_file.wanted_days()
+
     # TODO: Loop over the list of days.
     ccb.get_day(days[0])
     activities = ccb.get_activities()
