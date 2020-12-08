@@ -343,7 +343,7 @@ class Activity:
             check = True
         else:
             logging.info('No space at the moment')
-            check = True
+            check = False
 
         return check
 

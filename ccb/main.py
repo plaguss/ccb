@@ -421,6 +421,9 @@ if __name__ == '__main__':
     # Wait 2 seconds in case the time is needed to load the page.
     time.sleep(2)
 
+    START = time.time()  # Initial time check, to allow stopping the program if a given time is elapsed.
+    MAX_TIME_RUNNING = 3600  # 1 hour in seconds, total time allowed to run.
+
     # Get username and password to be sent.
     username, password = config_file.submit_info()
     ccb.submit(username, password)
@@ -430,17 +433,26 @@ if __name__ == '__main__':
     days = config_file.wanted_days()
 
     # TODO: Loop over the list of days. For the moment only one
+    # TODO: Check for different hours and days
     ccb.get_day(days[0])
     activities = ccb.get_activities()
     wanted_activities = config_file.wanted_classes()
-    # TODO: Get the correct hour.
     wanted_hours = config_file.wanted_hours()
-    wanted_hour = act.Hour('15:00')
-    for activity in activities:
-        if activity.name in wanted_activities:  # Check only in those selected.
-            if wanted_hour in activity.schedule:  # Check for the hour.
-                logging.info("Activity: {}".format(activity))
-                is_booked = activity.book()
-                logging.info("Are we registered? {}.".format(is_booked))
+    wanted_hour = wanted_hours[0]
+    is_booked = False
+    while not is_booked:
+        for activity in activities:
+            if activity.name in wanted_activities:  # Check only in those selected.
+                if wanted_hour in activity.schedule:  # Check for the hour.
+                    logging.info("Activity: {}".format(activity))
+                    is_booked = activity.book()
 
-    # ccb.close_page()
+        time_elapsed = time.time() - START
+        logging.info("is_booked: {}, time: {}.".format(is_booked, time_elapsed))
+        ccb.refresh()  # refresh the page in case any button isn't where isn't expected.
+        time.sleep(5)
+
+        if time_elapsed > MAX_TIME_RUNNING:
+            logging.info("___ Max time allowed running reached ___")
+            ccb.close_page()
+            sys.exit()
