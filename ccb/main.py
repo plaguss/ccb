@@ -447,12 +447,12 @@ if __name__ == '__main__':
                     logging.info("Activity: {}".format(activity))
                     is_booked = activity.book()
 
-        time_elapsed = time.time() - START
-        logging.info("is_booked: {}, time: {}.".format(is_booked, time_elapsed))
+        time_elapsed = round(time.time() - START, 2)
+        logging.info("is_booked: {}, time elapsed: {} secs.".format(is_booked, time_elapsed))
         ccb.refresh()  # refresh the page in case any button isn't where isn't expected.
         time.sleep(5)
 
-        if time_elapsed > MAX_TIME_RUNNING:
-            logging.info("___ Max time allowed running reached ___")
+        # Close the page if a class is booked or if the max time running is reached
+        if is_booked or time_elapsed > MAX_TIME_RUNNING:
             ccb.close_page()
             sys.exit()
